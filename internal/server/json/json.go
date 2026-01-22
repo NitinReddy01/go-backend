@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"unified_platform/internal/errs"
 )
 
 type SuccessResponse[T any] struct {
@@ -39,29 +40,11 @@ func OK[T any](w http.ResponseWriter, data T) {
 	JSON(w, http.StatusOK, data)
 }
 
-func ErrorJSON(w http.ResponseWriter, status int, message string, details ErrorDetails) {
+func Error(w http.ResponseWriter, err *errs.HTTPError) {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
+	w.WriteHeader(err.Status)
 
-	if err := json.NewEncoder(w).Encode(ErrorResponse{
-		Success: false,
-		Error: ErrorObject{
-			Message: message,
-			Details: details,
-		},
-	}); err != nil {
-		log.Printf("response encode failed: %v", err)
+	if e := json.NewEncoder(w).Encode(err); e != nil {
+		log.Printf("response encode failed: %v", e)
 	}
-}
-
-func BadRequest(w http.ResponseWriter, message string, details ErrorDetails) {
-	ErrorJSON(w, http.StatusBadRequest, message, details)
-}
-
-func Unauthorized(w http.ResponseWriter, message string) {
-	ErrorJSON(w, http.StatusUnauthorized, message, nil)
-}
-
-func Internal(w http.ResponseWriter) {
-	ErrorJSON(w, http.StatusInternalServerError, "Internal server error", nil)
 }

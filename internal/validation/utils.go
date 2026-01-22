@@ -2,6 +2,7 @@ package validation
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -16,7 +17,6 @@ type Validatable interface {
 }
 
 func BindAndValidateBody(r *http.Request, payload Validatable) error {
-
 	if r.Body == nil {
 		return errs.NewBadRequestError("request body is required", true, nil, nil, nil)
 	}
@@ -27,7 +27,58 @@ func BindAndValidateBody(r *http.Request, payload Validatable) error {
 	decoder.DisallowUnknownFields()
 
 	if err := decoder.Decode(payload); err != nil {
-		return errs.NewBadRequestError("invalid request body", true, nil, nil, nil)
+
+		var syntaxErr *json.SyntaxError
+		var typeErr *json.UnmarshalTypeError
+
+		switch {
+		case errors.As(err, &syntaxErr):
+			return errs.NewBadRequestError(
+				"invalid JSON syntax",
+				true,
+				nil,
+				nil,
+				nil,
+			)
+
+		case errors.As(err, &typeErr):
+			return errs.NewBadRequestError(
+				fmt.Sprintf("%s must be a %s", typeErr.Field, typeErr.Type),
+				true,
+				nil,
+				[]errs.FieldError{
+					{
+						Field: strings.ToLower(typeErr.Field),
+						Error: fmt.Sprintf("must be a %s", typeErr.Type),
+					},
+				},
+				nil,
+			)
+
+		case strings.HasPrefix(err.Error(), "json: unknown field"):
+			field := strings.TrimPrefix(err.Error(), "json: unknown field ")
+			return errs.NewBadRequestError(
+				"unknown field in request body",
+				true,
+				nil,
+				[]errs.FieldError{
+					{
+						Field: strings.Trim(field, `"`),
+						Error: "is not allowed",
+					},
+				},
+				nil,
+			)
+
+		default:
+			return errs.NewBadRequestError(
+				"invalid request body",
+				true,
+				nil,
+				nil,
+				nil,
+			)
+		}
 	}
 
 	if err := payload.Validate(); err != nil {

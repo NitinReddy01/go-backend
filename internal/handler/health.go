@@ -4,13 +4,14 @@ import (
 	"context"
 	"net/http"
 	"time"
+	"unified_platform/internal/errs"
 	"unified_platform/internal/server/json"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type HealthHandler interface {
-	HealthCheck(w http.ResponseWriter, r *http.Request)
+	HealthCheck(w http.ResponseWriter, r *http.Request) error
 }
 
 type healthHandler struct {
@@ -23,14 +24,13 @@ func NewHealthHandler(pool *pgxpool.Pool) HealthHandler {
 	}
 }
 
-func (h *healthHandler) HealthCheck(w http.ResponseWriter, r *http.Request) {
+func (h *healthHandler) HealthCheck(w http.ResponseWriter, r *http.Request) error {
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
 
 	checks := make(map[string]map[string]any)
 	overallHealthy := true
 
-	// Database check
 	start := time.Now()
 	if err := h.pool.Ping(ctx); err != nil {
 		overallHealthy = false
@@ -47,19 +47,24 @@ func (h *healthHandler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !overallHealthy {
-		json.ErrorJSON(
-			w,
-			http.StatusServiceUnavailable,
-			"one or more dependencies are unhealthy",
-			json.ErrorDetails{
-				"checks": checks,
+		return &errs.HTTPError{
+			Code:     "SERVICE_UNAVAILABLE",
+			Message:  "one or more dependencies are unhealthy",
+			Status:   http.StatusServiceUnavailable,
+			Override: true,
+			Errors: []errs.FieldError{
+				{
+					Field: "database",
+					Error: "unhealthy",
+				},
 			},
-		)
-		return
+			Action: nil,
+		}
 	}
 
 	json.OK(w, map[string]any{
 		"status": "healthy",
 		"checks": checks,
 	})
+	return nil
 }

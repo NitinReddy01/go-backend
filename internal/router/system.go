@@ -2,10 +2,9 @@ package router
 
 import (
 	"unified_platform/internal/handler"
-
-	"github.com/go-chi/chi/v5"
+	approuter "unified_platform/internal/router/app_router"
 )
 
-func registerSystemRoutes(r *chi.Mux, h handler.HealthHandler) {
+func registerSystemRoutes(r approuter.AppRouter, h handler.HealthHandler) {
 	r.Get("/health", h.HealthCheck)
 }

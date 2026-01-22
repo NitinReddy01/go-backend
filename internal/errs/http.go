@@ -1,6 +1,8 @@
 package errs
 
-import "strings"
+import (
+	"strings"
+)
 
 type FieldError struct {
 	Field string `json:"field"`

@@ -2,10 +2,9 @@ package v1
 
 import (
 	"unified_platform/internal/handler"
-
-	"github.com/go-chi/chi/v5"
+	approuter "unified_platform/internal/router/app_router"
 )
 
-func registerAuthRoutes(r chi.Router, h handler.AuthHandler) {
+func registerAuthRoutes(r approuter.AppRouter, h handler.AuthHandler) {
 	r.Post("/login/username", h.LoginWithUsername)
 }

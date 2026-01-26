@@ -1,11 +1,13 @@
 package service
 
 import (
+	"context"
 	"unified_platform/internal/dtos"
 	"unified_platform/internal/repository"
 )
 
 type AuthService interface {
+	LoginWithUsername(ctx context.Context, data *dtos.LoginUsernameRequest) (*dtos.LoginResponse, error)
 }
 
 type authService struct {
@@ -18,6 +20,13 @@ func NewAuthService(repo repository.AuthRepository) AuthService {
 	}
 }
 
-func (svc *authService) LoginWithUsername(data dtos.LoginUsernameRequest) {
+func (svc *authService) LoginWithUsername(
+	ctx context.Context,
+	data *dtos.LoginUsernameRequest,
+) (*dtos.LoginResponse, error) {
 
+	return &dtos.LoginResponse{
+		AccessToken: "dummy-token",
+		UserID:      "123",
+	}, nil
 }

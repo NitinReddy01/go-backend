@@ -10,3 +10,8 @@ type LoginUsernameRequest struct {
 func (p *LoginUsernameRequest) Validate() error {
 	return validation.Validate.Struct(p)
 }
+
+type LoginResponse struct {
+	AccessToken string `json:"accessToken"`
+	UserID      string `json:"userId"`
+}

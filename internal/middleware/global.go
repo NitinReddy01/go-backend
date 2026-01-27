@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/NitinReddy01/go-backend/internal/errs"
+	"github.com/NitinReddy01/go-backend/internal/sqlerr"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
 )
@@ -58,6 +59,7 @@ func (g *globalMiddlewares) GlobalErrorHandler(c *echo.Context, err error) {
 			}
 		} else {
 			// need to handle sql error
+			err = sqlerr.HandleError(err)
 		}
 	}
 

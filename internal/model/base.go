@@ -12,6 +12,11 @@ type Base struct {
 	UpdatedAt time.Time `json:"updatedAt" db:"updated_at"`
 }
 
+type BaseWithDeletedAt struct {
+	Base
+	DeletedAt *time.Time `json:"deletedAt,omitempty"  db:"deleted_at"`
+}
+
 type PaginatedResponse[T any] struct {
 	Data       []T `json:"data"`
 	Page       int `json:"page"`

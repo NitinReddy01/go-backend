@@ -23,7 +23,7 @@ func New(cfg *config.Config) (*server, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	pool, err := db.New(ctx, cfg.DB_URL)
+	pool, err := db.New(ctx, cfg.DB)
 
 	if err != nil {
 		return nil, fmt.Errorf("Failed to initialize db:%w", err)
@@ -39,11 +39,11 @@ func New(cfg *config.Config) (*server, error) {
 
 func (svr *server) SetUpHTTPServer(h http.Handler) {
 	svr.httpServer = &http.Server{
-		Addr:         ":" + svr.cfg.Port,
+		Addr:         ":" + svr.cfg.HTTP.Port,
 		Handler:      h,
-		WriteTimeout: time.Second * 30,
-		ReadTimeout:  time.Second * 10,
-		IdleTimeout:  time.Minute,
+		WriteTimeout: svr.cfg.HTTP.WriteTimeout,
+		ReadTimeout:  svr.cfg.HTTP.ReadTimeout,
+		IdleTimeout:  svr.cfg.HTTP.IdleTimeout,
 	}
 }
 
@@ -51,7 +51,7 @@ func (svr *server) Run() error {
 	if svr.httpServer == nil {
 		return fmt.Errorf("http server not initialized")
 	}
-	log.Println("server running on", svr.cfg.Port)
+	log.Println("server running on", svr.cfg.HTTP.Port)
 	return svr.httpServer.ListenAndServe()
 }
 

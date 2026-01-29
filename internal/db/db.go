@@ -4,20 +4,20 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"time"
 
+	"github.com/NitinReddy01/go-backend/internal/config"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func New(ctx context.Context, url string) (*pgxpool.Pool, error) {
-	cfg, err := pgxpool.ParseConfig(url)
+func New(ctx context.Context, dbCfg config.DBConfig) (*pgxpool.Pool, error) {
+	cfg, err := pgxpool.ParseConfig(dbCfg.URL)
 
 	if err != nil {
 		return nil, err
 	}
-	cfg.MaxConns = 20
-	cfg.MaxConnLifetime = time.Hour
-	cfg.MaxConnIdleTime = 30 * time.Minute
+	cfg.MaxConns = dbCfg.MaxConns
+	cfg.MaxConnLifetime = dbCfg.MaxConnLifetime
+	cfg.MaxConnIdleTime = dbCfg.MaxConnIdleTime
 
 	pool, err := pgxpool.NewWithConfig(ctx, cfg)
 

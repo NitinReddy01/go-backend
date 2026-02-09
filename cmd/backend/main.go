@@ -11,11 +11,16 @@ import (
 
 	"github.com/NitinReddy01/go-backend/internal/config"
 	"github.com/NitinReddy01/go-backend/internal/handler"
+	"github.com/NitinReddy01/go-backend/internal/logger"
 	"github.com/NitinReddy01/go-backend/internal/repository"
 	"github.com/NitinReddy01/go-backend/internal/router"
 	"github.com/NitinReddy01/go-backend/internal/server"
 	"github.com/NitinReddy01/go-backend/internal/service"
 )
+
+// @title Go Backend Boilerplate API
+// @version 1.0
+// @description Production ready API template using Echo
 
 func main() {
 	config := config.LoadConfig()
@@ -29,8 +34,9 @@ func main() {
 	repos := repository.NewRepositories(svr.Pool)
 	services := service.NewServices(repos)
 	handlers := handler.NewHandlers(services, svr.Pool)
+	logger := logger.New(config.Observability)
 
-	router := router.New(handlers, config.CORSAllowedOrigins)
+	router := router.New(handlers, config.CORSAllowedOrigins, logger)
 
 	svr.SetUpHTTPServer(router)
 

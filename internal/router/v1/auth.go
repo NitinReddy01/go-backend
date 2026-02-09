@@ -9,4 +9,5 @@ func registerAuthRoutes(r *echo.Group, h handler.AuthHandler) {
 	authentication := r.Group("/auth")
 
 	authentication.POST("/login/username", h.LoginWithUsername)
+	authentication.POST("/sign-up/password", h.PasswordSignUp)
 }

@@ -104,6 +104,9 @@ build-api:
 	@go build -o $(SERVER_BINARY) cmd/backend/main.go
 	@echo "✅ Server built to $(SERVER_BINARY)"
 
+swagger:
+	swag init -g cmd/backend/main.go
+
 
 # ====================================
 # DATABASE MIGRATIONS
@@ -127,19 +130,19 @@ migration:
 # Run all pending database migrations
 migrate-up:
 	@echo "📊 Running database migrations..."
-	@goose -dir $(MIGRATIONS_DIR) postgres $(PG_URL) up
+	@goose -dir $(MIGRATIONS_DIR) postgres $(DB_URL) up
 	@echo "✅ Migrations completed!"
 
 # Rollback the most recent migration
 migrate-down:
 	@echo "⏪ Rolling back last migration..."
-	@goose -dir $(MIGRATIONS_DIR) postgres $(PG_URL) down
+	@goose -dir $(MIGRATIONS_DIR) postgres $(DB_URL) down
 	@echo "✅ Migration rolled back!"
 
 # Show the status of all migrations
 migrate-status:
 	@echo "📊 Checking migration status..."
-	@goose -dir $(MIGRATIONS_DIR) postgres $(PG_URL) status
+	@goose -dir $(MIGRATIONS_DIR) postgres $(DB_URL) status
 
 # Reset the database by rolling back all migrations and re-applying them
 # ⚠️  WARNING: This will delete all data in your database!
@@ -147,7 +150,7 @@ migrate-status:
 migrate-reset:
 	@echo "⚠️  WARNING: This will reset your database and delete all data!"
 	@echo "🗑️  Rolling back all migrations..."
-	@goose -dir $(MIGRATIONS_DIR) postgres $(PG_URL) reset
+	@goose -dir $(MIGRATIONS_DIR) postgres $(DB_URL) reset
 	@echo "📊 Re-running all migrations..."
 	@make migrate-up
 	@echo "✅ Database reset complete!"

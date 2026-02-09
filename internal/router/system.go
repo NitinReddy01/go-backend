@@ -8,4 +8,5 @@ import (
 func registerSystemRoutes(r *echo.Echo, h handler.HealthHandler) {
 
 	r.GET("/health", h.HealthCheck)
+	r.Static("/docs", "docs")
 }

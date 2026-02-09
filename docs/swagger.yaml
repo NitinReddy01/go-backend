@@ -1,0 +1,79 @@
+definitions:
+  auth.PasswordSignUpPayload:
+    properties:
+      name:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      username:
+        type: string
+    required:
+    - name
+    - password
+    - username
+    type: object
+  errs.Action:
+    properties:
+      message:
+        type: string
+      value:
+        type: string
+    type: object
+  errs.FieldError:
+    properties:
+      error:
+        type: string
+      field:
+        type: string
+    type: object
+  errs.HTTPError:
+    properties:
+      action:
+        $ref: '#/definitions/errs.Action'
+      code:
+        type: string
+      errors:
+        items:
+          $ref: '#/definitions/errs.FieldError'
+        type: array
+      message:
+        type: string
+      override:
+        type: boolean
+      status:
+        type: integer
+    type: object
+info:
+  contact: {}
+  description: Production ready API template using Echo
+  title: Go Backend Boilerplate API
+  version: "1.0"
+paths:
+  /api/v1/auth/signup:
+    post:
+      consumes:
+      - application/json
+      description: Create asd new user
+      parameters:
+      - description: Signup
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/auth.PasswordSignUpPayload'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/auth.PasswordSignUpPayload'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errs.HTTPError'
+      summary: Create user
+      tags:
+      - v1/auth
+swagger: "2.0"

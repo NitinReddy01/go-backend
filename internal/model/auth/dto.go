@@ -15,3 +15,13 @@ type SuccessLoginResponse struct {
 	AccessToken string `json:"accessToken"`
 	UserID      string `json:"userID"`
 }
+
+type PasswordSignUpPayload struct {
+	Username string `json:"username" validate:"required"`
+	Password string `json:"password" validate:"required,min=6"`
+	Name     string `json:"name" validate:"required"`
+}
+
+func (p *PasswordSignUpPayload) Validate() error {
+	return validation.Validate.Struct(p)
+}

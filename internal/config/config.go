@@ -12,8 +12,9 @@ import (
 )
 
 type Config struct {
-	HTTP HTTPConfig
-	DB   DBConfig
+	HTTP          HTTPConfig
+	DB            DBConfig
+	Observability ObservabilityConfig
 
 	CORSAllowedOrigins []string `validate:"required,min=1,dive,required"`
 }
@@ -52,6 +53,11 @@ func LoadConfig() *Config {
 			MaxConnIdleTime: mustDuration("DB_MAX_CONN_IDLE_TIME", 30*time.Minute),
 		},
 		CORSAllowedOrigins: parseCSV(mustEnv("CORS_ALLOWED_ORIGINS")),
+		Observability: ObservabilityConfig{
+			Environment: mustEnv("ENV"),
+			ServiceName: mustEnv("SERVICE_NAME"),
+			LogLevel:    mustEnv("LOG_LEVEL"),
+		},
 	}
 
 	if err := validation.Validate.Struct(cfg); err != nil {

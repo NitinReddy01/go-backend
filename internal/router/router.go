@@ -1,14 +1,16 @@
 package router
 
 import (
+	"log/slog"
+
 	"github.com/NitinReddy01/go-backend/internal/handler"
 	"github.com/NitinReddy01/go-backend/internal/middleware"
 	v1 "github.com/NitinReddy01/go-backend/internal/router/v1"
 	"github.com/labstack/echo/v5"
 )
 
-func New(h *handler.Handlers, origins []string) *echo.Echo {
-	middlewares := middleware.NewMiddlewares(origins)
+func New(h *handler.Handlers, origins []string, logger *slog.Logger) *echo.Echo {
+	middlewares := middleware.NewMiddlewares(origins, logger)
 
 	router := echo.New()
 
@@ -20,6 +22,7 @@ func New(h *handler.Handlers, origins []string) *echo.Echo {
 		middlewares.Global.Secure(),
 		middlewares.Global.RequestID(),
 		middlewares.Global.RequestLogger(),
+		middlewares.Global.EnhanceContext(),
 	)
 
 	registerSystemRoutes(router, h.Health)

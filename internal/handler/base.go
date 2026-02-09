@@ -7,6 +7,8 @@ import (
 
 type HandlerFunc[Req validation.Validatable, Res any] func(c *echo.Context, req Req) (Res, error)
 
+type HandlerFuncNoContent[Req validation.Validatable] func(c *echo.Context, req Req) error
+
 // ResponseHandler defines the interface for handling different response types
 type ResponseHandler interface {
 	Handle(c *echo.Context, result interface{}) error
@@ -19,6 +21,14 @@ type JSONResponseHandler struct {
 
 func (h JSONResponseHandler) Handle(c *echo.Context, result any) error {
 	return c.JSON(h.status, result)
+}
+
+type NoContentResponseHandler struct {
+	status int
+}
+
+func (h NoContentResponseHandler) Handle(c *echo.Context, result interface{}) error {
+	return c.NoContent(h.status)
 }
 
 func handleRequest[Req validation.Validatable](
@@ -50,5 +60,18 @@ func Handle[Req validation.Validatable, Res any](
 		return handleRequest(c, req, func(c *echo.Context, req Req) (any, error) {
 			return handler(c, req)
 		}, JSONResponseHandler{status: status})
+	}
+}
+
+func HandleNoContent[Req validation.Validatable](
+	handler HandlerFuncNoContent[Req],
+	status int,
+	req Req,
+) echo.HandlerFunc {
+	return func(c *echo.Context) error {
+		return handleRequest(c, req, func(c *echo.Context, req Req) (interface{}, error) {
+			err := handler(c, req)
+			return nil, err
+		}, NoContentResponseHandler{status: status})
 	}
 }

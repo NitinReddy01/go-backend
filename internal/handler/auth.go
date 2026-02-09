@@ -11,6 +11,7 @@ import (
 type AuthHandler interface {
 	LoginWithUsername(c *echo.Context) error
 	Logout(c *echo.Context) error
+	PasswordSignUp(c *echo.Context) error
 }
 
 type authHandler struct {
@@ -36,4 +37,24 @@ func (h *authHandler) LoginWithUsername(c *echo.Context) error {
 func (h *authHandler) Logout(c *echo.Context) error {
 	return nil
 
+}
+
+// CreateUser godoc
+// @Summary Create user
+// @Description Create asd new user
+// @Tags v1/auth
+// @Accept json
+// @Produce json
+// @Param payload body auth.PasswordSignUpPayload true "Signup"
+// @Success 201 {object} auth.PasswordSignUpPayload
+// @Failure 400 {object} errs.HTTPError
+// @Router /api/v1/auth/signup [post]
+func (h *authHandler) PasswordSignUp(c *echo.Context) error {
+	return HandleNoContent(
+		func(c *echo.Context, payload *auth.PasswordSignUpPayload) error {
+			return h.svc.PasswordSignUp(c, payload)
+		},
+		http.StatusCreated,
+		&auth.PasswordSignUpPayload{},
+	)(c)
 }

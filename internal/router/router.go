@@ -3,13 +3,14 @@ package router
 import (
 	"log/slog"
 
+	"github.com/NitinReddy01/go-backend/internal/config"
 	"github.com/NitinReddy01/go-backend/internal/handler"
 	"github.com/NitinReddy01/go-backend/internal/middleware"
 	v1 "github.com/NitinReddy01/go-backend/internal/router/v1"
 	"github.com/labstack/echo/v5"
 )
 
-func New(h *handler.Handlers, origins []string, logger *slog.Logger) *echo.Echo {
+func New(h *handler.Handlers, origins []string, logger *slog.Logger, env config.Environment) *echo.Echo {
 	middlewares := middleware.NewMiddlewares(origins, logger)
 
 	router := echo.New()
@@ -25,7 +26,7 @@ func New(h *handler.Handlers, origins []string, logger *slog.Logger) *echo.Echo 
 		middlewares.Global.EnhanceContext(),
 	)
 
-	registerSystemRoutes(router, h.Health)
+	registerSystemRoutes(router, h.Health, env)
 
 	v1Group := router.Group("/api/v1")
 

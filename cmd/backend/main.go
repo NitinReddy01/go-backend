@@ -21,6 +21,11 @@ import (
 // @title Go Backend Boilerplate API
 // @version 1.0
 // @description Production ready API template using Echo
+// @BasePath /api/v1
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 
 func main() {
 	config := config.LoadConfig()
@@ -36,7 +41,7 @@ func main() {
 	handlers := handler.NewHandlers(services, svr.Pool)
 	logger := logger.New(config.Observability)
 
-	router := router.New(handlers, config.CORSAllowedOrigins, logger)
+	router := router.New(handlers, config.CORSAllowedOrigins, logger, config.Env)
 
 	svr.SetUpHTTPServer(router)
 

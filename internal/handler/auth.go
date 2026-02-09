@@ -48,7 +48,7 @@ func (h *authHandler) Logout(c *echo.Context) error {
 // @Param payload body auth.PasswordSignUpPayload true "Signup"
 // @Success 201 {object} auth.PasswordSignUpPayload
 // @Failure 400 {object} errs.HTTPError
-// @Router /api/v1/auth/signup [post]
+// @Router /api/v1/auth/sign-up/password [post]
 func (h *authHandler) PasswordSignUp(c *echo.Context) error {
 	return HandleNoContent(
 		func(c *echo.Context, payload *auth.PasswordSignUpPayload) error {

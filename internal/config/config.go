@@ -11,10 +11,19 @@ import (
 	"github.com/joho/godotenv"
 )
 
+type Environment string
+
+const (
+	EnvDev     Environment = "dev"
+	EnvStaging Environment = "staging"
+	EnvProd    Environment = "prod"
+)
+
 type Config struct {
 	HTTP          HTTPConfig
 	DB            DBConfig
 	Observability ObservabilityConfig
+	Env           Environment `validate:"required,oneof=dev staging prod"`
 
 	CORSAllowedOrigins []string `validate:"required,min=1,dive,required"`
 }
@@ -40,6 +49,7 @@ func LoadConfig() *Config {
 	}
 
 	cfg := &Config{
+		Env: Environment(mustEnv("ENV")),
 		HTTP: HTTPConfig{
 			Port:         mustEnv("PORT"),
 			ReadTimeout:  mustDuration("HTTP_READ_TIMEOUT", 10*time.Second),

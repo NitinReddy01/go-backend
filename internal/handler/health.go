@@ -8,6 +8,7 @@ import (
 	"github.com/NitinReddy01/go-backend/internal/errs"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v5"
+	"github.com/redis/go-redis/v9"
 )
 
 type HealthHandler interface {
@@ -15,12 +16,14 @@ type HealthHandler interface {
 }
 
 type healthHandler struct {
-	pool *pgxpool.Pool
+	pool  *pgxpool.Pool
+	redis *redis.Client
 }
 
-func NewHealthHandler(pool *pgxpool.Pool) HealthHandler {
+func NewHealthHandler(pool *pgxpool.Pool, redis *redis.Client) HealthHandler {
 	return &healthHandler{
-		pool: pool,
+		pool:  pool,
+		redis: redis,
 	}
 }
 
@@ -44,6 +47,25 @@ func (h *healthHandler) HealthCheck(c *echo.Context) error {
 		checks["database"] = map[string]any{
 			"status":        "healthy",
 			"response_time": time.Since(start).String(),
+		}
+	}
+
+	if h.redis != nil {
+		ctx, cancel := context.WithTimeout(c.Request().Context(), 5*time.Second)
+		defer cancel()
+
+		start := time.Now()
+		if err := h.redis.Ping(ctx).Err(); err != nil {
+			checks["redis"] = map[string]any{
+				"status":        "unhealthy",
+				"error":         err.Error(),
+				"response_time": time.Since(start).String(),
+			}
+		} else {
+			checks["redis"] = map[string]any{
+				"status":        "healthy",
+				"response_time": time.Since(start).String(),
+			}
 		}
 	}
 

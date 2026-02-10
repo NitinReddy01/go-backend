@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -30,16 +29,17 @@ import (
 func main() {
 	config := config.LoadConfig()
 
-	svr, err := server.New(config)
+	logger := logger.New(config.Observability)
+
+	svr, err := server.New(config, logger)
 
 	if err != nil {
-		log.Fatal("failed to initialise server:", err)
+		logger.Error("failed to initialise server", "error", err)
 	}
 
 	repos := repository.NewRepositories(svr.Pool)
 	services := service.NewServices(repos)
-	handlers := handler.NewHandlers(services, svr.Pool)
-	logger := logger.New(config.Observability)
+	handlers := handler.NewHandlers(services, svr.Pool, svr.Redis)
 
 	router := router.New(handlers, config.CORSAllowedOrigins, logger, config.Env)
 
@@ -50,20 +50,20 @@ func main() {
 
 	go func() {
 		if err := svr.Run(); err != nil && err != http.ErrServerClosed {
-			log.Fatal("Failed to start server", err)
+			logger.Error("Failed to start server", "error", err)
 		}
 	}()
 
 	<-signalCtx.Done()
 
-	log.Println("Server shutting down")
+	logger.Info("Server shutting down")
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	if err := svr.Shutdown(shutdownCtx); err != nil {
-		log.Print("server forced to shutdown: ", err)
+		logger.Error("server forced to shutdown", "error", err)
 	}
 
-	log.Print("server exited properly")
+	logger.Info("server exited properly")
 
 }

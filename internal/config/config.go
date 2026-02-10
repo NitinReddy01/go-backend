@@ -24,6 +24,7 @@ type Config struct {
 	DB            DBConfig
 	Observability ObservabilityConfig
 	Env           Environment `validate:"required,oneof=dev staging prod"`
+	Redis         RedisConfig
 
 	CORSAllowedOrigins []string `validate:"required,min=1,dive,required"`
 }
@@ -41,6 +42,12 @@ type DBConfig struct {
 	MaxConns        int32
 	MaxConnLifetime time.Duration
 	MaxConnIdleTime time.Duration
+}
+
+type RedisConfig struct {
+	URL      string
+	Username string
+	Password string
 }
 
 func LoadConfig() *Config {
@@ -68,6 +75,11 @@ func LoadConfig() *Config {
 			ServiceName: mustEnv("SERVICE_NAME"),
 			LogLevel:    mustEnv("LOG_LEVEL"),
 		},
+		Redis: RedisConfig{
+			URL:      readEnv("REDIS_URL"),
+			Username: readEnv("REDIS_USERNAME"),
+			Password: readEnv("REDIS_PASSWORD"),
+		},
 	}
 
 	if err := validation.Validate.Struct(cfg); err != nil {
@@ -75,6 +87,10 @@ func LoadConfig() *Config {
 	}
 
 	return cfg
+}
+
+func readEnv(key string) string {
+	return strings.TrimSpace(os.Getenv(key))
 }
 
 func mustEnv(key string) string {

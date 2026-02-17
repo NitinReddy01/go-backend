@@ -38,8 +38,6 @@ func BindAndValidate(c *echo.Context, payload Validatable) error {
 		case errors.As(err, &syntaxErr):
 			return errs.NewBadRequestError(
 				"invalid JSON syntax",
-				true,
-				nil,
 				nil,
 				nil,
 			)
@@ -47,7 +45,6 @@ func BindAndValidate(c *echo.Context, payload Validatable) error {
 		case errors.As(err, &typeErr):
 			return errs.NewBadRequestError(
 				"invalid field type",
-				true,
 				nil,
 				[]errs.FieldError{
 					{
@@ -55,14 +52,11 @@ func BindAndValidate(c *echo.Context, payload Validatable) error {
 						Error: fmt.Sprintf("must be a %s", typeErr.Type),
 					},
 				},
-				nil,
 			)
 
 		default:
 			return errs.NewBadRequestError(
 				"invalid request body",
-				true,
-				nil,
 				nil,
 				nil,
 			)
@@ -71,7 +65,7 @@ func BindAndValidate(c *echo.Context, payload Validatable) error {
 
 	if err := payload.Validate(); err != nil {
 		msg, fields := extractValidationErrors(err)
-		return errs.NewBadRequestError(msg, true, nil, fields, nil)
+		return errs.NewBadRequestError(msg, nil, fields)
 	}
 
 	return nil

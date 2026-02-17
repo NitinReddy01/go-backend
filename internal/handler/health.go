@@ -71,17 +71,15 @@ func (h *healthHandler) HealthCheck(c *echo.Context) error {
 
 	if !overallHealthy {
 		return &errs.HTTPError{
-			Code:     "SERVICE_UNAVAILABLE",
-			Message:  "one or more dependencies are unhealthy",
-			Status:   http.StatusServiceUnavailable,
-			Override: true,
+			Code:    "SERVICE_UNAVAILABLE",
+			Message: "one or more dependencies are unhealthy",
+			Status:  http.StatusServiceUnavailable,
 			Errors: []errs.FieldError{
 				{
 					Field: "database",
 					Error: "unhealthy",
 				},
 			},
-			Action: nil,
 		}
 	}
 

@@ -124,7 +124,7 @@ func (g *globalMiddlewares) GlobalErrorHandler(c *echo.Context, err error) {
 	if !errors.As(err, &httpErr) {
 		var sc echo.HTTPStatusCoder
 		if errors.As(err, &sc) {
-			err = errs.NewNotFoundError("Route not found", false, nil)
+			err = errs.NewNotFoundError("Route not found", nil)
 		} else {
 			// need to handle sql error
 			err = sqlerr.HandleError(err)
@@ -135,7 +135,6 @@ func (g *globalMiddlewares) GlobalErrorHandler(c *echo.Context, err error) {
 	var code string
 	var message string
 	var fieldErrors []errs.FieldError
-	var action *errs.Action
 
 	switch {
 	case errors.As(err, &httpErr):
@@ -143,7 +142,6 @@ func (g *globalMiddlewares) GlobalErrorHandler(c *echo.Context, err error) {
 		code = httpErr.Code
 		message = httpErr.Message
 		fieldErrors = httpErr.Errors
-		action = httpErr.Action
 
 	default:
 		var sc echo.HTTPStatusCoder
@@ -171,12 +169,9 @@ func (g *globalMiddlewares) GlobalErrorHandler(c *echo.Context, err error) {
 	)
 
 	c.JSON(status, errs.HTTPError{
-		Status:   status,
-		Code:     code,
-		Message:  message,
-		Errors:   fieldErrors,
-		Action:   action,
-		Override: httpErr != nil && httpErr.Override,
+		Code:    code,
+		Message: message,
+		Errors:  fieldErrors,
 	})
 
 }

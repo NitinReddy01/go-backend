@@ -2,25 +2,23 @@ package errs
 
 import "net/http"
 
-func NewUnauthorizedError(message string, override bool) *HTTPError {
+func NewUnauthorizedError(message string) *HTTPError {
 	return &HTTPError{
-		Code:     MakeUpperCaseWithUnderscores(http.StatusText(http.StatusUnauthorized)),
-		Message:  message,
-		Status:   http.StatusUnauthorized,
-		Override: override,
+		Code:    MakeUpperCaseWithUnderscores(http.StatusText(http.StatusUnauthorized)),
+		Message: message,
+		Status:  http.StatusUnauthorized,
 	}
 }
 
-func NewForbiddenError(message string, override bool) *HTTPError {
+func NewForbiddenError(message string) *HTTPError {
 	return &HTTPError{
-		Code:     MakeUpperCaseWithUnderscores(http.StatusText(http.StatusForbidden)),
-		Message:  message,
-		Status:   http.StatusForbidden,
-		Override: override,
+		Code:    MakeUpperCaseWithUnderscores(http.StatusText(http.StatusForbidden)),
+		Message: message,
+		Status:  http.StatusForbidden,
 	}
 }
 
-func NewBadRequestError(message string, override bool, code *string, errors []FieldError, action *Action) *HTTPError {
+func NewBadRequestError(message string, code *string, errors []FieldError) *HTTPError {
 	formattedCode := MakeUpperCaseWithUnderscores(http.StatusText(http.StatusBadRequest))
 
 	if code != nil {
@@ -28,16 +26,14 @@ func NewBadRequestError(message string, override bool, code *string, errors []Fi
 	}
 
 	return &HTTPError{
-		Code:     formattedCode,
-		Message:  message,
-		Status:   http.StatusBadRequest,
-		Override: override,
-		Errors:   errors,
-		Action:   action,
+		Code:    formattedCode,
+		Message: message,
+		Status:  http.StatusBadRequest,
+		Errors:  errors,
 	}
 }
 
-func NewNotFoundError(message string, override bool, code *string) *HTTPError {
+func NewNotFoundError(message string, code *string) *HTTPError {
 	formattedCode := MakeUpperCaseWithUnderscores(http.StatusText(http.StatusNotFound))
 
 	if code != nil {
@@ -45,18 +41,16 @@ func NewNotFoundError(message string, override bool, code *string) *HTTPError {
 	}
 
 	return &HTTPError{
-		Code:     formattedCode,
-		Message:  message,
-		Status:   http.StatusNotFound,
-		Override: override,
+		Code:    formattedCode,
+		Message: message,
+		Status:  http.StatusNotFound,
 	}
 }
 
 func NewInternalServerError() *HTTPError {
 	return &HTTPError{
-		Code:     MakeUpperCaseWithUnderscores(http.StatusText(http.StatusInternalServerError)),
-		Message:  http.StatusText(http.StatusInternalServerError),
-		Status:   http.StatusInternalServerError,
-		Override: false,
+		Code:    MakeUpperCaseWithUnderscores(http.StatusText(http.StatusInternalServerError)),
+		Message: http.StatusText(http.StatusInternalServerError),
+		Status:  http.StatusInternalServerError,
 	}
 }

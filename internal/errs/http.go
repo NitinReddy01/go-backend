@@ -15,12 +15,10 @@ type Action struct {
 }
 
 type HTTPError struct {
-	Code     string       `json:"code"`
-	Message  string       `json:"message"`
-	Status   int          `json:"status"`
-	Errors   []FieldError `json:"errors"`
-	Override bool         `json:"override"`
-	Action   *Action      `json:"action"`
+	Code    string       `json:"code"`
+	Message string       `json:"message"`
+	Status  int          `json:"status,omitempty"`
+	Errors  []FieldError `json:"errors"`
 }
 
 func (e *HTTPError) Error() string {

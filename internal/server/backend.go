@@ -32,6 +32,10 @@ func New(cfg *config.Config, logger *slog.Logger) (*server, error) {
 		return nil, fmt.Errorf("Failed to initialize db:%w", err)
 	}
 
+	if err := db.Migrate(ctx, pool); err != nil {
+		return nil, fmt.Errorf("failed to run migrations: %w", err)
+	}
+
 	redisClient := redis.NewClient(&redis.Options{
 		Addr:     cfg.Redis.URL,
 		Username: cfg.Redis.Username,

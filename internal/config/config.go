@@ -37,7 +37,12 @@ type HTTPConfig struct {
 }
 
 type DBConfig struct {
-	URL string `validate:"required"`
+	Host     string `validate:"required"`
+	Port     string `validate:"required"`
+	User     string `validate:"required"`
+	Password string `validate:"required"`
+	Name     string `validate:"required"`
+	SSLMode  string
 
 	MaxConns        int32
 	MaxConnLifetime time.Duration
@@ -64,7 +69,12 @@ func LoadConfig() *Config {
 			IdleTimeout:  mustDuration("HTTP_IDLE_TIMEOUT", 60*time.Second),
 		},
 		DB: DBConfig{
-			URL:             mustEnv("DB_URL"),
+			Host:            mustEnv("DB_HOST"),
+			Port:            mustEnv("DB_PORT"),
+			User:            mustEnv("DB_USER"),
+			Password:        mustEnv("DB_PASSWORD"),
+			Name:            mustEnv("DB_NAME"),
+			SSLMode:         getEnv("DB_SSL_MODE", "disable"),
 			MaxConns:        mustInt32("DB_MAX_CONNS", 20),
 			MaxConnLifetime: mustDuration("DB_MAX_CONN_LIFETIME", time.Hour),
 			MaxConnIdleTime: mustDuration("DB_MAX_CONN_IDLE_TIME", 30*time.Minute),
@@ -91,6 +101,13 @@ func LoadConfig() *Config {
 
 func readEnv(key string) string {
 	return strings.TrimSpace(os.Getenv(key))
+}
+
+func getEnv(key, fallback string) string {
+	if val := strings.TrimSpace(os.Getenv(key)); val != "" {
+		return val
+	}
+	return fallback
 }
 
 func mustEnv(key string) string {

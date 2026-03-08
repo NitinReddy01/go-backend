@@ -10,7 +10,11 @@ import (
 )
 
 func New(ctx context.Context, dbCfg config.DBConfig) (*pgxpool.Pool, error) {
-	cfg, err := pgxpool.ParseConfig(dbCfg.URL)
+	dsn := fmt.Sprintf(
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		dbCfg.Host, dbCfg.Port, dbCfg.User, dbCfg.Password, dbCfg.Name, dbCfg.SSLMode,
+	)
+	cfg, err := pgxpool.ParseConfig(dsn)
 
 	if err != nil {
 		return nil, err
